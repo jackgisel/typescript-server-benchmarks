@@ -66,23 +66,22 @@ const taskNames = [
 ];
 
 async function main() {
-  await Promise.all(
-    ownerNames.map(async (ownerName) => {
-      return await prisma.owner.create({
-        data: {
-          name: ownerName,
-          tasks: {
-            createMany: {
-              data: taskNames.map((taskName) => ({
-                description: taskName,
-                status: false,
-              })),
-            },
-          },
+  const owners = await prisma.owner.createMany({
+    data: ownerNames.map((ownerName) => ({
+      name: ownerName,
+      tasks: {
+        createMany: {
+          data: taskNames.map((taskName) => ({
+            description: taskName,
+            status: false,
+          })),
         },
-      });
-    })
-  );
+      },
+    })),
+  });
+
+  const tasks = await prisma.task.findMany();
+  const notes = await prisma.note.createMany();
 }
 main()
   .then(async () => {
